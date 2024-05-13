@@ -1,5 +1,4 @@
-# pylint: disable=all
-from blackhole.data_processor.blueprints.devops_texts_blueprint import (
+from blackhole.dataprocessor.blueprints.devops_texts_blueprint import (
     devops_texts_blueprint,
 )
 
