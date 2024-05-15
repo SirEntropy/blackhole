@@ -14,10 +14,3 @@ The project consists of the following main components:
 
 4. **LLM Fine-tuning**: The stored data is used to fine-tune a pre-trained LLM. The fine-tuning process involves training the LLM on the organization-specific data, enabling it to capture the nuances, terminology, and patterns specific to the internal systems and processes. The fine-tuned LLM can then be used for various natural language processing tasks within the organization.
 
-## Benefits
-
-By collecting data from internal systems, processing it, and using it to fine-tune an LLM, this project offers several benefits:
-
-- **Improved LLM Performance**: Fine-tuning the LLM on organization-specific data enhances its ability to understand and generate text that aligns with the organization's context and requirements.
-- **Customization**: The fine-tuned LLM can be tailored to the specific needs of the organization, enabling it to better handle domain-specific tasks and provide more accurate and relevant outputs.
-- **Scalability**: The use of Amazon DynamoDB ensures that the data storage is scalable and can handle large volumes of data efficiently.
