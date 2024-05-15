@@ -6,6 +6,9 @@ RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /app
 
+RUN echo "Current directory: $(pwd)"
+RUN ls -la
+
 COPY pyproject.toml ./
 COPY poetry.lock ./
 RUN poetry config virtualenvs.create false \
