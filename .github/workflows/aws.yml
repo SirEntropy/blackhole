@@ -1,45 +1,47 @@
-name: AWS
+name: Deploy to EC2
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches:
-        - main
-    types: [closed]
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::495860673956:oidc-provider/token.actions.githubusercontent.com
-          role-session-name: GitHubActions
-          aws-region: us-west-1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push Docker image to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: blackhole-docker
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: blackhole-docker
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f blackhole/dataprocessor/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Deploy to EC2
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: your-ecr-repository
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          ssh ec2-user@your-ec2-instance-ip "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          ssh ec2-user@your-ec2-instance-ip "docker run -d -p 80:8000 --env-file .env.prod $ECR_REPOSITORY:$IMAGE_TAG"
+    - name: Deploy to EC2
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: blackhole-docker
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-15-90 "
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker stop my-container || true
+          docker rm my-container || true
+          docker run -d --name my-container -p 80:80 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        "
