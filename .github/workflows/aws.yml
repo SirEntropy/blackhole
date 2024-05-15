@@ -39,7 +39,7 @@ jobs:
         ECR_REPOSITORY: blackhole-docker
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-15-90 "
+        ssh -o StrictHostKeyChecking=no ec2-user@ec2-54-176-75-8.us-west-1.compute.amazonaws.com "
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker stop my-container || true
           docker rm my-container || true
