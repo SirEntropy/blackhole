@@ -23,4 +23,4 @@ By collecting data from internal systems, processing it, and using it to fine-tu
 - **Scalability**: The use of Amazon DynamoDB ensures that the data storage is scalable and can handle large volumes of data efficiently.
 - **Data Security**: Proper data security measures are implemented to protect sensitive information during the collection, processing, and storage stages.
 
-This README provides a high-level overview of the project's purpose and components. For more detailed information on installation, configuration, and usage, please refer to the project's documentation.
+
