@@ -22,5 +22,3 @@ By collecting data from internal systems, processing it, and using it to fine-tu
 - **Customization**: The fine-tuned LLM can be tailored to the specific needs of the organization, enabling it to better handle domain-specific tasks and provide more accurate and relevant outputs.
 - **Scalability**: The use of Amazon DynamoDB ensures that the data storage is scalable and can handle large volumes of data efficiently.
 - **Data Security**: Proper data security measures are implemented to protect sensitive information during the collection, processing, and storage stages.
-
-
