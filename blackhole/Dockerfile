@@ -6,9 +6,6 @@ RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /app
 
-RUN echo "Current directory: $(pwd)"
-RUN ls -la
-
 COPY blackhole/poetry.lock blackhole/pyproject.toml /app/
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
