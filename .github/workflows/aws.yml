@@ -35,10 +35,12 @@ jobs:
 
     - name: Deploy to EC2
       env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: blackhole-docker
         IMAGE_TAG: ${{ github.sha }}
       run: |
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         ssh -o StrictHostKeyChecking=no ec2-user@ec2-54-176-75-8.us-west-1.compute.amazonaws.com "
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker stop my-container || true
