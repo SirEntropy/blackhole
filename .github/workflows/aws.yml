@@ -41,7 +41,7 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no ec2-user@ec2-54-176-75-8.us-west-1.compute.amazonaws.com "
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@ec2-54-176-75-8.us-west-1.compute.amazonaws.com "
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker stop my-container || true
           docker rm my-container || true
