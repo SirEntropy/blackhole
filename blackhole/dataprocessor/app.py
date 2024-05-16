@@ -1,6 +1,9 @@
 from blackhole.dataprocessor.blueprints.devops_texts_blueprint import (
     devops_texts_blueprint,
 )
+from blackhole.dataprocessor.blueprints.incident_texts_blueprint import (
+    incident_texts_blueprint,
+)
 
 from flask import Flask, request, jsonify
 import yaml
@@ -14,6 +17,7 @@ env = os.environ.get("FLASK_ENV", "development")
 app.config.from_pyfile(f"config/{env}.py")
 
 app.register_blueprint(devops_texts_blueprint)
+app.register_blueprint(incident_texts_blueprint)
 
 
 @app.route("/")
