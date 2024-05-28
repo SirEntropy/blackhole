@@ -22,9 +22,9 @@ app = Flask(__name__)
 env = os.environ.get("FLASK_ENV", "development")
 app.config.from_pyfile(f"config/{env}.py")
 
+app.register_blueprint(infrastructure_texts_blueprint)
 app.register_blueprint(devops_texts_blueprint)
 app.register_blueprint(incident_texts_blueprint)
-app.register_blueprint(infrastructure_texts_blueprint)
 app.register_blueprint(codebase_texts_blueprint)
 
 

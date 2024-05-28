@@ -1,8 +1,11 @@
 from flask import Blueprint
 from flask_restx import Api, Resource, fields
+from blackhole.common.clients.aws_client import AwsClient
 
 devops_texts_blueprint = Blueprint("devops-texts", __name__)
 api = Api(devops_texts_blueprint)
+
+infra_dynamodb = AwsClient(resources=["dynamodb"])
 
 model = api.model(
     "DevopsTextsModel",
@@ -20,7 +23,8 @@ class DevopsTextsBlueprint(Resource):
     @api.doc(description="Get devops texts data")
     def get(self):
         # Process the GET request data
-        return {"message": "GET request received"}
+        response = infra_dynamodb.get_all_data_from_dynamodb("devops_texts")
+        return {"message": response}
 
     @api.expect(model)
     @api.doc(description="Store devops texts data")
