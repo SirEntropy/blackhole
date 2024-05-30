@@ -9,6 +9,6 @@ def error_handler(func):
             return func(*args, **kwargs)
         except Exception as e:
             logging.error(f"Error in {func.__name__}: {e}")
-            return None
+            raise
 
     return wrapper
