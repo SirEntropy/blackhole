@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+      target_name:
+        description: 'Target name'
+        required: true
+        default: 'prod'
 
 jobs:
   deploy:
