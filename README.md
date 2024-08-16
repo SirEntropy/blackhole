@@ -12,5 +12,8 @@ The project consists of the following main components:
 
 3. **Data Storage**: The processed data is stored in Amazon DynamoDB, a highly scalable and flexible NoSQL database. DynamoDB provides fast and reliable access to the data, allowing efficient retrieval during the fine-tuning process.
 
-4. **LLM Fine-tuning**: The stored data is used to fine-tune a pre-trained LLM. The fine-tuning process involves training the LLM on the organization-specific data, enabling it to capture the nuances, terminology, and patterns specific to the internal systems and processes. 
+4. **LLM Fine-tuning**: The stored data is used to fine-tune a pre-trained LLM. The fine-tuning process involves training the LLM on the organization-specific data, enabling it to capture the nuances, terminology, and patterns specific to the internal systems and processes.
 
+5. **Performance Monitoring and Evaluation**: After fine-tuning the LLM, the model's performance is rigorously monitored and evaluated using a series of predefined metrics. This ensures that the LLM meets the organization's requirements in terms of accuracy, relevance, and response quality. Continuous evaluation helps in identifying areas where further improvements or additional fine-tuning may be necessary.
+
+6. **Continuous Integration and Deployment (CI/CD)**: The entire process, from data collection to LLM fine-tuning and deployment, is integrated into a CI/CD pipeline. This ensures that updates and improvements can be made seamlessly as new data becomes available. The automated pipeline allows for quick iterations, enabling the organization to keep the LLM up-to-date with minimal manual intervention.
