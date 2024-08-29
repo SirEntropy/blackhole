@@ -12,8 +12,6 @@ from blackhole.dataprocessor.blueprints.codebase_texts_blueprint import (
 )
 
 from flask import Flask, request, jsonify
-import yaml
-import logging
 import os
 
 
