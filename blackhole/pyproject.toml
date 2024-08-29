@@ -23,6 +23,7 @@ click = "^8.1.7"
 tensorflow = "^2.17.0"
 flax = "^0.9.0"
 pandas = "^2.2.2"
+openai = "^1.42.0"
 
 
 [build-system]
