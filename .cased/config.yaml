@@ -1,0 +1,95 @@
+# CASED Configuration File
+#
+# This file contains the configuration for your project's DevOps processes.
+# Please read the following instructions carefully before editing this file.
+#
+# Instructions:
+# 1. Required fields are marked with [REQUIRED]. These must be filled out for the tool to function properly.
+# 2. Optional fields are marked with [OPTIONAL]. Fill these out if they apply to your project.
+# 3. Fields with default values are pre-filled. Modify them as needed.
+# 4. Do not change the structure of this file (i.e., don't remove or rename sections).
+# 5. Use quotes around string values, especially if they contain special characters.
+# 6. For boolean values, use true or false (lowercase, no quotes).
+# 7. For lists, maintain the dash (-) format for each item.
+#
+# Sections:
+# - Project Metadata: Basic information about your project. All fields are required.
+# - Environment Configuration: Specify your project's runtime environment. Python or Node version is required if applicable.
+# - Testing Configuration: Set up your testing framework and files. Required if you want to run tests.
+# - Application Runtime Configuration: Define how your application runs. The entry_point is required.
+# - Docker Configuration: Required if you're using Docker. Set enabled to false if not using Docker.
+# - Kubernetes Configuration: Optional. Set enabled to true if you're using Kubernetes.
+# - Database Configuration: Optional. Fill out if your project uses a database.
+# - Message Broker Configuration: Optional. Fill out if your project uses a message broker.
+# - Cloud Deployment Configuration: Required if deploying to a cloud provider.
+# - Post-Deployment Actions: Optional. Configure health checks and notifications.
+#
+# After editing this file, run 'cased build' to generate your GitHub Actions workflow.
+# If you need help, refer to the documentation or run 'cased --help'.
+
+project:
+  description: <[OPTIONAL] PROJECT_DESCRIPTION>
+  name: blackhole
+  version: <[OPTIONAL] PROJECT_VERSION>
+
+environment:
+  dependency_files:
+    - <[OPTIONAL] Cased build will smart detect these files if not provided here>
+  dependency_manager: poetry
+  framework: Flask
+  language: Python
+  python_version: ">=3.10"
+
+runtime:
+  commands:
+    restart: <RESTART_COMMAND>
+    start: <START_COMMAND>
+    stop: <STOP_COMMAND>
+  entry_point: <The file name that contains your main function>
+  flags:
+    - "[OPTIONAL]"
+    - <FLAG_A>
+    - <FLAG_B>
+
+docker:
+  ECR Repository Name: "[REQUIRED] blackhole-docker"
+  build_args:
+    - "[OPTIONAL]"
+    - <BUILD_ARG1>=<VALUE1>
+    - <BUILD_ARG2>=<VALUE2>
+  enabled: true
+  environment:
+    - "[OPTIONAL]"
+    - <ENV_VAR1>=<VALUE1>
+    - <ENV_VAR2>=<VALUE2>
+  image_name: "[OPTIONAL] <IMAGE_NAME>"
+  ports:
+    - "[OPTIONAL] <HOST_PORT>:<CONTAINER_PORT>"
+
+cloud_deployment:
+  autoscaling:
+    enabled: true
+    max_instances: <MAX_INSTANCES>
+    min_instances: <MIN_INSTANCES>
+  instance_type: <INSTANCE_TYPE>
+  load_balancer:
+    enabled: true
+    type: <LOAD_BALANCER_TYPE>
+  provider: AWS
+  region: <CLOUD_REGION>
+
+post_deployment:
+  health_check:
+    interval: <HEALTH_CHECK_INTERVAL>
+    url: <HEALTH_CHECK_URL>
+  notifications:
+    channels:
+      - <NOTIFICATION_CHANNEL1>
+      - <NOTIFICATION_CHANNEL2>
+    email:
+      recipients:
+        - <EMAIL1>
+        - <EMAIL2>
+    enabled: true
+    slack:
+      webhook_url: <SLACK_WEBHOOK_URL>
