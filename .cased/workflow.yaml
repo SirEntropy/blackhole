@@ -1,0 +1,19 @@
+name: CI/CD Workflow
+'on':
+  push: main
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up environment
+      run: <SETUP_COMMAND>
+    - name: Run tests
+      run: <TEST_COMMAND>
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy
+      run: <DEPLOY_COMMAND>
