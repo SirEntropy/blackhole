@@ -14,3 +14,4 @@ The project consists of the following main components:
 
 4. **LLM Fine-tuning**: The stored data is used to fine-tune a pre-trained LLM. The fine-tuning process involves training the LLM on the organization-specific data, enabling it to capture the nuances, terminology, and patterns specific to the internal systems and processes. 
 
+4. **LLM Fine-tuning**: The stored data is used to fine-tune a pre-trained LLM. The fine-tuning process involves training the LLM on the organization-specific data, enabling it to capture the nuances, terminology, and patterns specific to the internal systems and processes. 
