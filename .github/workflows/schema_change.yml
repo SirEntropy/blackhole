@@ -1,0 +1,49 @@
+name: Schema Change
+
+on:
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: 'Branch to deploy'
+                required: true
+                default: 'main'
+            target_name:
+                description: 'Target name'
+                required: true
+                default: 'prod'
+
+
+jobs:
+    migrate:
+        runs-on: ubuntu-latest
+        
+        env:
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            DJANGO_SETTINGS_MODULE: 'your_project.settings'
+    
+        steps:
+        - uses: actions/checkout@v4
+    
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.x'
+        
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+    
+        - name: Set up AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_REGION }}
+    
+        - name: Run migrations
+          run: python manage.py migrate
