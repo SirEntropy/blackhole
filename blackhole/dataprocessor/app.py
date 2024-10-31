@@ -10,10 +10,9 @@ from blackhole.dataprocessor.blueprints.infrastructure_texts_blueprint import (
 from blackhole.dataprocessor.blueprints.codebase_texts_blueprint import (
     codebase_texts_blueprint,
 )
+from blackhole.dataprocessor.classification.classify import get_chat_response
 
 from flask import Flask, request, jsonify
-import yaml
-import logging
 import os
 
 
@@ -31,6 +30,21 @@ app.register_blueprint(codebase_texts_blueprint)
 @app.route("/")
 def index():
     return jsonify({"message": "Hello World"})
+
+
+@app.route("/devops", methods=["POST"])
+def classify():
+    user_input = request.json.get("message")
+
+    if not user_input:
+        return jsonify({"error": "No input provided"}), 400
+
+    try:
+        response = get_chat_response(user_input)
+        return jsonify({"response": response})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
