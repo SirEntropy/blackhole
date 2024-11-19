@@ -1,0 +1,26 @@
+name: Deploy
+
+on:
+    workflow_dispatch:
+      inputs:
+        branch:
+          description: 'Branch to deploy'
+          required: true
+          default: 'main'
+        target_name:
+          description: 'Target name'
+          required: true
+          default: 'prod'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Echo event
+      run: |
+        echo "Webhook received!"
+        echo "Event name: ${{ github.event_name }}"
+        echo "Triggered by: ${{ github.actor }}"
+        
+    - name: Check time
+      run: date
