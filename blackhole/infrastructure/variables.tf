@@ -54,3 +54,9 @@ variable "allowed_ssh_cidr_blocks" {
   type        = list(string)
   default     = []
 }
+
+variable "blue_green_instances" {
+  description = "Number of instances for blue-green deployment"
+  type        = number
+  default     = 2
+}
