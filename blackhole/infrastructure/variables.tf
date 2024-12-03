@@ -54,3 +54,9 @@ variable "allowed_ssh_cidr_blocks" {
   type        = list(string)
   default     = []
 }
+
+variable "blue_green_switch" {
+  description = "Switch between blue and green deployment"
+  type        = string
+  default     = "blue"
+}
