@@ -99,38 +99,20 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role        = aws_iam_role.ec2_role.name
 }
 
-# EC2 Instance
-resource "aws_instance" "main" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
+# Blue-Green Deployment EC2 Instances
+module "blue_green" {
+  source = "./modules/blue_green"
 
-  subnet_id                   = data.aws_subnet.selected.id
-  vpc_security_group_ids     = [aws_security_group.ec2_sg.id]
-  iam_instance_profile       = aws_iam_instance_profile.ec2_profile.name
-  associate_public_ip_address = var.assign_public_ip
-
-  root_block_device {
-    volume_type           = "gp3"
-    volume_size           = var.root_volume_size
-    encrypted            = true
-    delete_on_termination = true
-  }
-
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_tokens                 = "required"  # IMDSv2
-    http_put_response_hop_limit = 1
-  }
-
-  monitoring = true  # Detailed monitoring
-
-  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    environment = var.environment
-  }))
-
-  lifecycle {
-    ignore_changes = [ami]  # Ignore AMI changes for manual updates
-  }
+  ami_id                   = var.ami_id
+  instance_type            = var.instance_type
+  subnet_id                = data.aws_subnet.selected.id
+  vpc_security_group_ids   = [aws_security_group.ec2_sg.id]
+  iam_instance_profile     = aws_iam_instance_profile.ec2_profile.name
+  assign_public_ip         = var.assign_public_ip
+  root_volume_size         = var.root_volume_size
+  environment              = var.environment
+  project_name             = var.project_name
+  allowed_ssh_cidr_blocks  = var.allowed_ssh_cidr_blocks
 }
 
 # CloudWatch Alarm for CPU Usage
@@ -146,6 +128,6 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm" {
   alarm_description  = "This metric monitors EC2 CPU utilization"
   
   dimensions = {
-    InstanceId = aws_instance.main.id
+    InstanceId = module.blue_green.active_instance_id
   }
 }
