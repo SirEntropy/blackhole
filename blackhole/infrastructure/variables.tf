@@ -54,3 +54,52 @@ variable "allowed_ssh_cidr_blocks" {
   type        = list(string)
   default     = []
 }
+
+variable "rds_allocated_storage" {
+  description = "The allocated storage in gigabytes"
+  type        = number
+  default     = 20
+}
+
+variable "rds_engine" {
+  description = "The database engine to use"
+  type        = string
+  default     = "mysql"
+}
+
+variable "rds_engine_version" {
+  description = "The engine version to use"
+  type        = string
+  default     = "8.0"
+}
+
+variable "rds_instance_class" {
+  description = "The instance type of the RDS instance"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "rds_db_name" {
+  description = "The name of the database to create"
+  type        = string
+  default     = "mydb"
+}
+
+variable "rds_username" {
+  description = "The username for the database"
+  type        = string
+  default     = "admin"
+}
+
+variable "rds_password" {
+  description = "The password for the database"
+  type        = string
+  default     = "changeMe123"
+  sensitive   = true
+}
+
+variable "rds_parameter_group_name" {
+  description = "The name of the DB parameter group to associate"
+  type        = string
+  default     = "default.mysql8.0"
+}
