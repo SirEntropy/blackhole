@@ -4,6 +4,8 @@ from blackhole.dataprocessor.models.crawler import CrawlerMetadata, db
 # Define the blueprint
 crawler_bp = Blueprint("crawler", __name__)
 
+CRAWLER_FREQUENCY = 1
+
 
 # Define POST route to add new metadata
 @crawler_bp.route("/crawler", methods=["POST"])
