@@ -2,104 +2,112 @@ provider "aws" {
   region = var.aws_region
 }
 
-# VPC Configuration
-resource "aws_vpc" "staging_vpc" {
-  cidr_block = "10.0.0.0/16"
-  
-  tags = {
-    Name = "staging-vpc"
-    Environment = "staging"
-  }
+module "vpc" {
+  source       = "../../modules/vpc"
+  project_name = "${var.environment}-${var.org_base_name}"
+  vpc_cidr     = var.vpc_cidr
+  az_count     = var.az_count
+  aws_region   = var.aws_region
 }
 
-# Public Subnet
-resource "aws_subnet" "public_subnet" {
-  vpc_id     = aws_vpc.staging_vpc.id
-  cidr_block = "10.0.1.0/24"
-  
-  tags = {
-    Name = "staging-public-subnet"
-  }
+module "ssm" {
+  source       = "../../modules/ssm"
+  project_name = "${var.environment}-${var.project_base_name}"
+  environment  = var.environment
 }
 
-# Security Group
-resource "aws_security_group" "app_sg" {
-  name        = "app-sg"
-  description = "Security group for application servers"
-  vpc_id      = aws_vpc.staging_vpc.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Not recommended for production
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+module "ecr" {
+  source          = "../../modules/ecr"
+  repository_name = "cased/comet"
 }
 
-# EC2 Instance
-resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0"  # Ubuntu 20.04 LTS
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public_subnet.id
-  
-  vpc_security_group_ids = [aws_security_group.app_sg.id]
-  
-  root_block_device {
-    volume_size = 8
-  }
-  
-  tags = {
-    Name = "staging-app-server"
-    Environment = "staging"
-  }
+module "alb" {
+  source             = "../../modules/alb"
+  project_name       = "${var.environment}-${var.project_base_name}"
+  vpc_id             = module.vpc.vpc_id
+  public_subnets     = module.vpc.public_subnets
+  health_check_path  = "/_healthz"
+  domain_name        = "comet-staging.com"
+  route53_zone_id    = "Z0694280MLUITF5HVWO"
+  create_certificate = true
 }
 
-# RDS Instance
-resource "aws_db_instance" "staging_db" {
-  identifier        = "staging-db"
-  allocated_storage = 20
-  engine           = "postgres"
-  engine_version   = "13.7"
-  instance_class   = "db.t3.micro"
-  username         = "admin"
-  password         = "password123"  # Bad practice - should use secrets management
-  
-  skip_final_snapshot = true
-  
-  tags = {
-    Environment = "staging"
-  }
+module "ecs" {
+  source                = "../../modules/ecs"
+  project_name          = "${var.environment}-${var.project_base_name}"
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  private_subnets       = module.vpc.private_subnets
+  app_port              = var.app_port
+  app_count             = var.app_count
+  fargate_cpu           = var.fargate_cpu
+  fargate_memory        = var.fargate_memory
+  ecr_repo_url          = module.ecr.repository_url
+  aws_region            = var.aws_region
+  alb_target_group_arn  = module.alb.target_group_arn
+  alb_listener_http     = module.alb.alb_listener_http
+  alb_listener_https    = module.alb.alb_listener_https
+  alb_security_group_id = module.alb.alb_security_group_id
+  ssm_parameter_arns    = module.ssm.ssm_parameter_arns
 }
 
-# S3 Bucket
-resource "aws_s3_bucket" "storage" {
-  bucket = "staging-storage-bucket"
-  
-  tags = {
-    Environment = "staging"
-  }
+resource "random_string" "redis_username" {
+  length  = 16
+  special = false
 }
 
-# Allow public access to S3 bucket (not recommended for production)
-resource "aws_s3_bucket_public_access_block" "storage" {
-  bucket = aws_s3_bucket.storage.id
+resource "random_password" "redis_password" {
+  length  = 32
+  special = false
+}
 
-  block_public_acls   = false
-  block_public_policy = false
-  ignore_public_acls  = false
-  restrict_public_buckets = false
+module "redis" {
+  source                        = "../../modules/redis"
+  project_name                  = "${var.environment}-${var.project_base_name}"
+  vpc_id                        = module.vpc.vpc_id
+  private_subnets               = module.vpc.private_subnets
+  ecs_sg_id                     = module.ecs.ecs_tasks_sg_id
+  redis_node_type               = "cache.t3.medium"
+  redis_num_cache_nodes         = 2
+  redis_snapshot_retention_limit = 1
+  redis_engine_version          = "6.x"
+  redis_parameter_group_family  = "redis6.x"
+  redis_at_rest_encryption      = true
+  redis_transit_encryption      = true
+  redis_maintenance_window      = "sun:05:00-sun:06:00"
+  redis_snapshot_window         = "01:00-02:00"
+  redis_username                = random_string.redis_username.result
+  redis_password                = random_password.redis_password.result
+  redis_maxmemory_policy        = "allkeys-lru"
+  redis_port                    = 6379
+}
+
+resource "random_string" "db_username" {
+  length  = 24
+  special = false
+}
+
+resource "random_password" "db_password" {
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+module "rds" {
+  source               = "../../modules/rds"
+  project_name         = "${var.environment}-${var.project_base_name}"
+  vpc_id               = module.vpc.vpc_id
+  private_subnets      = module.vpc.private_subnets
+  ecs_sg_id            = module.ecs.ecs_tasks_sg_id
+  db_name              = var.db_name
+  db_username          = random_string.db_username.result
+  db_password          = random_password.db_password.result
+  db_instance_class    = var.db_instance_class
+  db_engine_version    = var.db_engine_version
+  availability_zones   = ["us-west-2a", "us-west-2b"]  # Explicitly specify available AZs
+  db_instance_count    = 2  # Make sure this matches the number of AZs
 }
