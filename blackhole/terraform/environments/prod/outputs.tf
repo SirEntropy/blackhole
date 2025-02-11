@@ -1,33 +1,29 @@
+output "ec2_instance_id" {
+  description = "ID of the EC2 instance"
+  value       = aws_instance.app_server.id
+}
+
+output "ec2_instance_public_ip" {
+  description = "Public IP of the EC2 instance"
+  value       = aws_instance.app_server.public_ip
+}
+
 output "rds_endpoint" {
-  description = "The connection endpoint for the Aurora cluster"
-  value       = module.rds.db_cluster_endpoint
-  sensitive   = true
+  description = "RDS instance endpoint"
+  value       = aws_db_instance.database.endpoint
 }
 
-output "rds_reader_endpoint" {
-  description = "The reader endpoint for the Aurora cluster"
-  value       = module.rds.db_cluster_reader_endpoint
-  sensitive   = true
+output "elasticache_endpoint" {
+  description = "ElastiCache cluster endpoint"
+  value       = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
-output "rds_database_name" {
-  description = "The name of the database"
-  value       = module.rds.db_cluster_name
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = aws_ecr_repository.app.repository_url
 }
 
-output "rds_username" {
-  description = "The master username for the database"
-  value       = module.rds.db_cluster_username
-  sensitive   = true
-}
-
-output "rds_port" {
-  description = "The port the database is listening on"
-  value       = module.rds.db_cluster_port
-}
-
-output "database_url" {
-  description = "The connection URL for the database"
-  value       = "postgresql://${random_string.db_username.result}:${random_password.db_password.result}@${module.rds.db_cluster_endpoint}/${var.db_name}"
-  sensitive   = true
+output "s3_bucket_name" {
+  description = "Name of the S3 bucket"
+  value       = aws_s3_bucket.app_data.id
 }

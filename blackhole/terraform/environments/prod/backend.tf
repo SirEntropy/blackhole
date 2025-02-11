@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket  = "prod-cased-terraform-state"    
+    bucket  = "prod-blackhole-terraform-state"    
     key     = "prod/terraform.tfstate"
-    region  = "us-west-2"
+    region  = "us-east-2"
     encrypt = true
   }
 }
