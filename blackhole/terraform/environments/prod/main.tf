@@ -1,107 +1,217 @@
-provider "aws" {
-  region = var.aws_region
+resource "aws_instance" "app_server" {
+  ami           = data.aws_ami.amazon_linux_2.id
+  instance_type = var.instance_type
+  subnet_id     = var.subnet_ids[0]
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    encrypted   = true
+  }
+
+  monitoring = true
+
+  tags = {
+    Name = "${var.environment}-app-server"
+  }
 }
 
-module "vpc" {
-  source       = "../../modules/vpc"
-  project_name = "${var.environment}-${var.org_base_name}"
-  vpc_cidr     = var.vpc_cidr
-  az_count     = var.az_count
-  aws_region   = var.aws_region
+# RDS Instance
+resource "aws_db_instance" "database" {
+  identifier        = "${var.environment}-database"
+  engine            = "postgres"
+  engine_version    = "14"
+  username          = var.db_username
+  password          = var.db_password
+  instance_class    = var.db_instance_class
+  allocated_storage = 20
+  storage_type      = "gp3"
+
+  multi_az               = true
+  db_subnet_group_name   = aws_db_subnet_group.default.name
+  vpc_security_group_ids = [aws_security_group.database.id]
+
+  backup_retention_period = 7
+  backup_window          = "03:00-04:00"
+  maintenance_window     = "Mon:04:00-Mon:05:00"
+
+  storage_encrypted = true
+  
+  deletion_protection = true
+  skip_final_snapshot = false
+
+  tags = {
+    Name = "${var.environment}-database"
+  }
 }
 
-module "ssm" {
-  source       = "../../modules/ssm"
-  project_name = "${var.environment}-${var.project_base_name}"
-  environment  = var.environment
+# ElastiCache Cluster
+resource "aws_elasticache_cluster" "redis" {
+  cluster_id           = "${var.environment}-redis"
+  engine              = "redis"
+  node_type           = var.cache_node_type
+  num_cache_nodes     = 1
+  parameter_group_name = "default.redis7"
+  port                = 6379
+  
+  subnet_group_name    = aws_elasticache_subnet_group.default.name
+  security_group_ids   = [aws_security_group.cache.id]
+
+  snapshot_retention_limit = 7
+  snapshot_window         = "05:00-06:00"
+  maintenance_window      = "sun:06:00-sun:07:00"
+
+  tags = {
+    Name = "${var.environment}-redis"
+  }
 }
 
-data "aws_ecr_repository" "repo" {
-  name = "cased/comet"
+# ECR Repository
+resource "aws_ecr_repository" "app" {
+  name = "${var.environment}-app"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  encryption_configuration {
+    encryption_type = "KMS"
+  }
 }
 
-module "alb" {
-  source             = "../../modules/alb"
-  project_name       = "${var.environment}-${var.project_base_name}"
-  vpc_id             = module.vpc.vpc_id
-  public_subnets     = module.vpc.public_subnets
-  health_check_path  = "/_healthz/"
-  domain_name        = "app.cased.com"
-  route53_zone_id    = "Z02583051HT9V0WZAUL7B"
-  create_certificate = true
+# S3 Bucket
+resource "aws_s3_bucket" "app_data" {
+  bucket = "${var.environment}-app-data-${data.aws_caller_identity.current.account_id}"
+
+  tags = {
+    Name = "${var.environment}-app-data"
+  }
 }
 
-module "ecs" {
-  source                = "../../modules/ecs"
-  project_name          = "${var.environment}-${var.project_base_name}"
-  environment           = var.environment
-  vpc_id                = module.vpc.vpc_id
-  private_subnets       = module.vpc.private_subnets
-  app_port              = var.app_port
-  app_count             = var.app_count
-  fargate_cpu           = var.fargate_cpu
-  fargate_memory        = var.fargate_memory
-  ecr_repo_url          = data.aws_ecr_repository.repo.repository_url
-  aws_region            = var.aws_region
-  alb_target_group_arn  = module.alb.target_group_arn
-  alb_listener_http     = module.alb.alb_listener_http
-  alb_listener_https    = module.alb.alb_listener_https
-  alb_security_group_id = module.alb.alb_security_group_id
-  ssm_parameter_arns    = module.ssm.ssm_parameter_arns
+resource "aws_s3_bucket_versioning" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
-resource "random_string" "redis_username" {
-  length  = 16
-  special = false
+resource "aws_s3_bucket_server_side_encryption_configuration" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
 }
 
-resource "random_password" "redis_password" {
-  length  = 32
-  special = false
+# Supporting resources
+resource "aws_db_subnet_group" "default" {
+  name       = "${var.environment}-db-subnet-group"
+  subnet_ids = var.subnet_ids
+
+  tags = {
+    Name = "${var.environment}-db-subnet-group"
+  }
 }
 
-module "redis" {
-  source                        = "../../modules/redis"
-  project_name                  = "${var.environment}-${var.project_base_name}"
-  vpc_id                        = module.vpc.vpc_id
-  private_subnets               = module.vpc.private_subnets
-  ecs_sg_id                     = module.ecs.ecs_tasks_sg_id
-  redis_node_type               = "cache.t3.medium"
-  redis_num_cache_nodes         = 2
-  redis_snapshot_retention_limit = 1
-  redis_engine_version          = "6.x"
-  redis_parameter_group_family  = "redis6.x"
-  redis_at_rest_encryption      = true
-  redis_transit_encryption      = true
-  redis_maintenance_window      = "sun:05:00-sun:06:00"
-  redis_snapshot_window         = "01:00-02:00"
-  redis_username                = random_string.redis_username.result
-  redis_password                = random_password.redis_password.result
-  redis_maxmemory_policy        = "allkeys-lru"
-  redis_port                    = 6379
+resource "aws_elasticache_subnet_group" "default" {
+  name       = "${var.environment}-cache-subnet-group"
+  subnet_ids = var.subnet_ids
+
+  tags = {
+    Name = "${var.environment}-cache-subnet-group"
+  }
 }
 
-resource "random_string" "db_username" {
-  length  = 24
-  special = false
+# Security Groups
+resource "aws_security_group" "app" {
+  name_prefix = "${var.environment}-app-"
+  description = "Security group for application server"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
+    description = "SSH access"
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP access"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS access"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+
+  tags = {
+    Name = "${var.environment}-app"
+  }
 }
 
-resource "random_password" "db_password" {
-  length           = 32
-  special          = false
+resource "aws_security_group" "database" {
+  name_prefix = "${var.environment}-database-"
+  description = "Security group for RDS instance"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+    description     = "PostgreSQL access from app servers"
+  }
+
+  tags = {
+    Name = "${var.environment}-database"
+  }
 }
 
-module "rds" {
-  source               = "../../modules/rds"
-  project_name         = "${var.environment}-${var.project_base_name}"
-  vpc_id               = module.vpc.vpc_id
-  private_subnets      = module.vpc.private_subnets
-  ecs_sg_id            = module.ecs.ecs_tasks_sg_id
-  db_name              = var.db_name
-  db_username          = random_string.db_username.result
-  db_password          = random_password.db_password.result
-  db_instance_class    = var.db_instance_class
-  db_engine_version    = var.db_engine_version
-  availability_zones   = ["us-west-2a", "us-west-2b"]  # Explicitly specify available AZs
-  db_instance_count    = 2  # Make sure this matches the number of AZs
+resource "aws_security_group" "cache" {
+  name_prefix = "${var.environment}-cache-"
+  description = "Security group for ElastiCache cluster"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+    description     = "Redis access from app servers"
+  }
+
+  tags = {
+    Name = "${var.environment}-cache"
+  }
 }
+
+# Data sources
+data "aws_ami" "amazon_linux_2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+data "aws_caller_identity" "current" {}
