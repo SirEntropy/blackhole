@@ -38,7 +38,7 @@ resource "aws_db_instance" "database" {
   storage_encrypted = true
   
   deletion_protection = true
-  skip_final_snapshot = false
+  skip_final_snapshot = true
 
   tags = {
     Name = "${var.environment}-database"
