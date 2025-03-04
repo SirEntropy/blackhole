@@ -27,3 +27,19 @@ output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.app_data.id
 }
+output "comet_id" {
+  description = "ID of the EC2 instance"
+  value       = aws_instance.comet.id
+}
+
+output "comet_private_ip" {
+  description = "Private IP address of the EC2 instance"
+  value       = aws_instance.comet.private_ip
+}
+
+
+output "comet_availability_zone" {
+  description = "Availability Zone of the EC2 instance"
+  value       = aws_instance.comet.availability_zone
+}
+
