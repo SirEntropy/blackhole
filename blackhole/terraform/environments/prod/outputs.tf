@@ -27,3 +27,19 @@ output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.app_data.id
 }
+output "tyu_id" {
+  description = "ID of the EC2 instance"
+  value       = aws_instance.tyu.id
+}
+
+output "tyu_private_ip" {
+  description = "Private IP address of the EC2 instance"
+  value       = aws_instance.tyu.private_ip
+}
+
+
+output "tyu_availability_zone" {
+  description = "Availability Zone of the EC2 instance"
+  value       = aws_instance.tyu.availability_zone
+}
+
