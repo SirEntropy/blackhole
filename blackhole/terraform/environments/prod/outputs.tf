@@ -27,3 +27,13 @@ output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.app_data.id
 }
+output "astro_id" {
+  description = "ID of the S3 bucket"
+  value       = aws_s3_bucket.astro.id
+}
+
+output "astro_arn" {
+  description = "ARN of the S3 bucket"
+  value       = aws_s3_bucket.astro.arn
+}
+
