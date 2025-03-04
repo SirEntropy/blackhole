@@ -26,4 +26,12 @@ output "ecr_repository_url" {
 output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.app_data.id
+}output "haha_id" {
+  description = "ID of the EC2 instance"
+  value       = aws_instance.haha.id
+}
+
+output "haha_private_ip" {
+  description = "Private IP address of the EC2 instance"
+  value       = aws_instance.haha.private_ip
 }
