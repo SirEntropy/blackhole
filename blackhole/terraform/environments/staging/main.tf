@@ -37,6 +37,26 @@ resource "random_id" "bucket_suffix" {
   byte_length = 8
 }
 
+resource "random_string" "redis_username" {
+  length  = 16
+  special = false
+}
+
+resource "random_string" "redis_password" {
+  length  = 16
+  special = false
+}
+
+resource "random_string" "db_username" {
+  length  = 16
+  special = false
+}
+
+resource "random_string" "db_username" {
+  length  = 16
+  special = false
+}
+
 # Create EC2 instance in us-east-1
 resource "aws_instance" "east_instance" {
   ami           = "ami-04a81a99f5ec58529" # Amazon Linux 2023 AMI in us-east-1
