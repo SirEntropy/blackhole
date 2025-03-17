@@ -44,7 +44,7 @@ resource "random_string" "redis_username" {
 
 resource "random_string" "redis_password" {
   length  = 16
-  special = false
+  special = true
 }
 
 resource "random_string" "db_username" {
