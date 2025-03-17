@@ -42,17 +42,17 @@ resource "random_string" "redis_username" {
   special = false
 }
 
-resource "random_string" "redis_password" {
+resource "random_string" "redis_username" {
   length  = 16
   special = false
 }
 
-resource "random_string" "db_username" {
+resource "random_string" "redis_username" {
   length  = 16
   special = false
 }
 
-resource "random_string" "db_password" {
+resource "random_string" "redis_username" {
   length  = 16
   special = false
 }
