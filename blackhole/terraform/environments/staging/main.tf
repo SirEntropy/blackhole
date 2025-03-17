@@ -72,3 +72,29 @@ output "east_instance_id" {
 output "west_instance_id" {
   value = aws_instance.west_instance.id
 }
+
+
+# Add AWS Budgets for cost control
+resource "aws_budgets_budget" "monthly_budget" {
+  name              = "Monthly Budget"
+  budget_type       = "COST"
+  limit_amount      = "100"
+  limit_unit        = "USD"
+  time_unit         = "MONTHLY"
+  cost_filters      = {}
+  cost_types        = {}
+  time_period_start = "2023-01-01_00:00"
+  time_period_end   = "2023-12-31_23:59"
+
+  notification {
+    comparison_operator = "GREATER_THAN"
+    notification_type   = "ACTUAL"
+    threshold           = 80
+    threshold_type      = "PERCENTAGE"
+
+    subscriber {
+      address          = "example@example.com"
+      subscription_type = "EMAIL"
+    }
+  }
+}
