@@ -20,6 +20,14 @@ resource "aws_s3_bucket" "terraform_state" {
     Name        = "Terraform State Bucket"
     Environment = "Management"
   }
+
+    server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 # Enable versioning for the S3 bucket
