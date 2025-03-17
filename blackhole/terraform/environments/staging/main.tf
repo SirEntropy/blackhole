@@ -20,6 +20,20 @@ resource "aws_s3_bucket" "terraform_state" {
     Name        = "Terraform State Bucket"
     Environment = "Management"
   }
+
+    lifecycle_rule {
+    id      = "log"
+    enabled = true
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    expiration {
+      days = 365
+    }
+  }
 }
 
 # Enable versioning for the S3 bucket
