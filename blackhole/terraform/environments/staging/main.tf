@@ -54,7 +54,7 @@ resource "random_string" "db_username" {
 
 resource "random_string" "db_password" {
   length  = 16
-  special = false
+  special = true
 }
 
 # Create EC2 instance in us-east-1
