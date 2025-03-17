@@ -134,7 +134,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
+    cidr_blocks = ["<YOUR_TRUSTED_IP>"]  # You might want to restrict this to your IP
     description = "SSH access"
   }
 
@@ -142,7 +142,7 @@ resource "aws_security_group" "app" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<YOUR_TRUSTED_IP>"]
     description = "HTTP access"
   }
 
@@ -150,7 +150,7 @@ resource "aws_security_group" "app" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<YOUR_TRUSTED_IP>"]
     description = "HTTPS access"
   }
 
@@ -158,7 +158,7 @@ resource "aws_security_group" "app" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<YOUR_TRUSTED_IP>"]
     description = "Allow all outbound traffic"
   }
 
