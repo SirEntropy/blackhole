@@ -52,7 +52,7 @@ resource "random_string" "db_username" {
   special = false
 }
 
-resource "random_string" "db_username" {
+resource "random_string" "db_password" {
   length  = 16
   special = false
 }
