@@ -39,7 +39,7 @@ resource "random_id" "bucket_suffix" {
 
 # Create EC2 instance in us-east-1
 resource "aws_instance" "east_instance" {
-  ami           = "ami-04a81a99f5ec58529" # Amazon Linux 2023 AMI in us-east-1
+  ami           = var.amis["us-east-1"] # Amazon Linux 2023 AMI in us-east-1
   instance_type = "t2.micro"              # Smallest instance type
   provider      = aws.east
 
