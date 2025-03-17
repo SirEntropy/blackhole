@@ -39,7 +39,7 @@ resource "random_id" "bucket_suffix" {
 
 resource "random_string" "redis_username" {
   length  = 16
-  special = false
+  special = true
 }
 
 resource "random_string" "redis_password" {
