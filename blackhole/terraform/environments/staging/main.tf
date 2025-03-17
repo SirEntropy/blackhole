@@ -72,3 +72,8 @@ output "east_instance_id" {
 output "west_instance_id" {
   value = aws_instance.west_instance.id
 }
+
+
+# This file configures the AWS provider and sets up resources for the staging environment.
+# It includes S3 bucket for Terraform state and EC2 instances in different regions.
+
