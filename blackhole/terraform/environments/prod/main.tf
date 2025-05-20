@@ -214,4 +214,15 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
+
+resource "aws_s3_bucket" "blackhole_classifier_terraform_state" {
+  bucket = "blackhole-classifier-terraform-state"
+  # Add any required configuration or tags here
+}
+
+resource "aws_s3_bucket" "blackhole_ml_training" {
+  bucket = "blackhole-ml-training"
+  # Add any required configuration or tags here
+}
+
 data "aws_caller_identity" "current" {}
