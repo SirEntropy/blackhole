@@ -72,9 +72,11 @@ resource "aws_instance" "east_instance" {
 resource "aws_instance" "west_instance" {
   ami           = "ami-0d9858aa3c6322f73" # Amazon Linux 2023 AMI in us-west-2
   instance_type = "t2.micro"              # Smallest instance type
+  instance_type = "t2.small"              # Changed from t2.micro to t2.small to match AWS
   provider      = aws.west
 
-  tags = {
+    Name = "EC2-West"
+    Purpose = "Nothing"   # Added missing tag to match AWS
     Name = "EC2-West"
   }
 }
