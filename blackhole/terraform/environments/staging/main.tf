@@ -1,3 +1,21 @@
+// --- Existing resources ---
+
+// ---- Added by Cased: Unmanaged S3 migration ----
+resource "aws_s3_bucket" "blackhole_classifier_terraform_state" {
+  bucket = "blackhole-classifier-terraform-state"
+  provider = aws
+  # region: us-east-1
+  # Adjust other settings, versioning, tags as needed
+}
+
+resource "aws_s3_bucket" "blackhole_ml_training" {
+  bucket = "blackhole-ml-training"
+  provider = aws
+  # region: us-east-2
+  # Adjust other settings, versioning, tags as needed
+}
+// ---- End Cased migration block ----
+
 # main.tf
 
 # Configure the AWS Provider
