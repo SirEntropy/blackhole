@@ -214,4 +214,14 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
+
+resource "aws_instance" "bh_test" {
+  ami           = "ami-0d9858aa3c6322f73"
+  instance_type = "t2.small"
+  provider      = aws.west
+  tags = {
+    Name = "bh-test"
+  }
+}
+
 data "aws_caller_identity" "current" {}
