@@ -71,10 +71,14 @@ resource "aws_instance" "east_instance" {
 # Create EC2 instance in us-west-2
 resource "aws_instance" "west_instance" {
   ami           = "ami-0d9858aa3c6322f73" # Amazon Linux 2023 AMI in us-west-2
+   instance_type = "t2.small"              # Updated to fix drift
+
   instance_type = "t2.micro"              # Smallest instance type
   provider      = aws.west
-
-  tags = {
+   tags = {
+     Name = "EC2-West"
+     Purpose = "Nothing" # Added to fix drift
+   }
     Name = "EC2-West"
   }
 }
