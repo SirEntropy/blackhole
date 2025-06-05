@@ -1,19 +1,3 @@
-resource "aws_instance" "app_server" {
-  ami           = data.aws_ami.amazon_linux_2.id
-  instance_type = var.instance_type
-  subnet_id     = var.subnet_ids[0]
-
-  root_block_device {
-    volume_type = "gp3"
-    volume_size = 20
-    encrypted   = true
-  }
-
-  monitoring = true
-
-  tags = {
-    Name = "${var.environment}-app-server"
-  }
 }
 
 # RDS Instance
