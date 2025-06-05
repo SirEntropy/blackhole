@@ -15,9 +15,6 @@ resource "aws_instance" "app_server" {
     Name = "${var.environment}-app-server"
   }
 }
-# New EC2 instance for algorithm processing
-
-
 
 # RDS Instance
 resource "aws_db_instance" "database" {
