@@ -72,15 +72,13 @@ resource "aws_instance" "east_instance" {
 resource "aws_instance" "west_instance" {
   ami           = "ami-0d9858aa3c6322f73" # Amazon Linux 2023 AMI in us-west-2
    instance_type = "t2.small"              # Updated to match AWS drift
-
-  provider      = aws.west
+   provider      = aws.west
 
    tags = {
      Name = "EC2-West"
-  provider      = aws.west
+     Purpose = "Nothing"
+   }
 
-  tags = {
-    Name = "bh-test"
   }
 }
 
