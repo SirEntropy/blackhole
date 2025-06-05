@@ -77,14 +77,6 @@ resource "aws_instance" "west_instance" {
 
    tags = {
      Name = "EC2-West"
-     Purpose = "Nothing"
-   }
-
-  }
-}
-resource "aws_instance" "bh_test" {
-  ami           = "ami-0d9858aa3c6322f73" # Same as west_instance
-  instance_type = "t2.small"              # Same type as corrected west_instance
   provider      = aws.west
 
   tags = {
