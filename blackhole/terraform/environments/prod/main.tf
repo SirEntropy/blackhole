@@ -87,13 +87,6 @@ resource "aws_s3_bucket" "app_data" {
     Name = "${var.environment}-app-data"
   }
 }
-resource "aws_s3_bucket" "service_artifacts" {
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
 }
 
 
