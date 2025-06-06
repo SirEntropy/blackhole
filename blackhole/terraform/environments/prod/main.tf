@@ -86,6 +86,59 @@ resource "aws_s3_bucket" "app_data" {
   tags = {
     Name = "${var.environment}-app-data"
   }
+
+# --- S3 Block Public Access (Recommended) ---
+resource "aws_s3_bucket_public_access_block" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# --- S3 Bucket Policy Template (Restrict Access; Fill in your principal/account as needed) ---
+resource "aws_s3_bucket_policy" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowAccountAccessOnly",
+      "Effect": "Allow",
+      "Principal": {"AWS": "arn:aws:iam::<YOUR-AWS-ACCOUNT-ID>:root"},  # <-- Replace with your principal(s)
+      "Action": "s3:*",
+      "Resource": [
+        "${aws_s3_bucket.app_data.arn}",
+        "${aws_s3_bucket.app_data.arn}/*"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+# --- DynamoDB Table for Terraform State Locking Template ---
+resource "aws_dynamodb_table" "terraform_state_lock" {
+  name         = "prod-terraform-lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+  tags = {
+    Name        = "prod-terraform-lock"
+    Environment = var.environment
+  }
+}
+# After applying, add the following to your backend.tf for state locking:
+#   dynamodb_table = "prod-terraform-lock"
+#
+# Remember to customize policy principals and update backend.tf as needed.
+
 }
 
 resource "aws_s3_bucket_versioning" "app_data" {
