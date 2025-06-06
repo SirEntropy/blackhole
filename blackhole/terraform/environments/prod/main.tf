@@ -104,6 +104,16 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "app_data" {
     }
   }
 }
+resource "aws_s3_bucket_public_access_block" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
 
 # Supporting resources
 resource "aws_db_subnet_group" "default" {
@@ -111,6 +121,17 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.subnet_ids
 
   tags = {
+resource "aws_security_group" "alb_sg" {
+  name_prefix = "${var.environment}-alb-"
+  description = "Security group for Application Load Balancer (placeholder)"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "${var.environment}-alb-sg"
+  }
+}
+
+
     Name = "${var.environment}-db-subnet-group"
   }
 }
@@ -119,7 +140,7 @@ resource "aws_elasticache_subnet_group" "default" {
   name       = "${var.environment}-cache-subnet-group"
   subnet_ids = var.subnet_ids
 
-  tags = {
+    cidr_blocks = ["1.2.3.4/32"]
     Name = "${var.environment}-cache-subnet-group"
   }
 }
@@ -127,7 +148,7 @@ resource "aws_elasticache_subnet_group" "default" {
 # Security Groups
 resource "aws_security_group" "app" {
   name_prefix = "${var.environment}-app-"
-  description = "Security group for application server"
+    security_groups = [aws_security_group.alb_sg.id]
   vpc_id      = var.vpc_id
 
   ingress {
@@ -135,7 +156,7 @@ resource "aws_security_group" "app" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
-    description = "SSH access"
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
   ingress {
