@@ -124,15 +124,16 @@ resource "aws_s3_bucket_public_access_block" "app_data" {
 }
 
 
+resource "aws_s3_bucket_public_access_block" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
 
-# Supporting resources
-resource "aws_db_subnet_group" "default" {
-  name       = "${var.environment}-db-subnet-group"
-  subnet_ids = var.subnet_ids
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
 
-  tags = {
-resource "aws_security_group" "alb_sg" {
-  name_prefix = "${var.environment}-alb-"
+
 resource "aws_security_group" "alb_sg" {
   name_prefix = "${var.environment}-alb-"
   description = "Security group for Application Load Balancer (placeholder)"
@@ -144,11 +145,31 @@ resource "aws_security_group" "alb_sg" {
 }
 
 
+
+# Supporting resources
+resource "aws_db_subnet_group" "default" {
+  name       = "${var.environment}-db-subnet-group"
+  subnet_ids = var.subnet_ids
+
+  tags = {
+resource "aws_security_group" "alb_sg" {
+    cidr_blocks = ["1.2.3.4/32"]  # You might want to restrict this to your IP
+resource "aws_security_group" "alb_sg" {
+  name_prefix = "${var.environment}-alb-"
   description = "Security group for Application Load Balancer (placeholder)"
   vpc_id      = var.vpc_id
 
   tags = {
     Name = "${var.environment}-alb-sg"
+    security_groups = [aws_security_group.alb_sg.id]
+}
+
+
+  description = "Security group for Application Load Balancer (placeholder)"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    security_groups = [aws_security_group.alb_sg.id]
   }
 }
 
