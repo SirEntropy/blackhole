@@ -114,6 +114,16 @@ resource "aws_s3_bucket_public_access_block" "app_data" {
 }
 
 
+resource "aws_s3_bucket_public_access_block" "app_data" {
+  bucket = aws_s3_bucket.app_data.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
 
 # Supporting resources
 resource "aws_db_subnet_group" "default" {
@@ -121,6 +131,8 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.subnet_ids
 
   tags = {
+resource "aws_security_group" "alb_sg" {
+  name_prefix = "${var.environment}-alb-"
 resource "aws_security_group" "alb_sg" {
   name_prefix = "${var.environment}-alb-"
   description = "Security group for Application Load Balancer (placeholder)"
@@ -132,7 +144,16 @@ resource "aws_security_group" "alb_sg" {
 }
 
 
-    Name = "${var.environment}-db-subnet-group"
+  description = "Security group for Application Load Balancer (placeholder)"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "${var.environment}-alb-sg"
+  }
+}
+
+
+    cidr_blocks = ["1.2.3.4/32"]
   }
 }
 
@@ -140,7 +161,7 @@ resource "aws_elasticache_subnet_group" "default" {
   name       = "${var.environment}-cache-subnet-group"
   subnet_ids = var.subnet_ids
 
-    cidr_blocks = ["1.2.3.4/32"]
+    security_groups = [aws_security_group.alb_sg.id]
     Name = "${var.environment}-cache-subnet-group"
   }
 }
