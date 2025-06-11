@@ -66,7 +66,17 @@ resource "aws_instance" "east_instance" {
   tags = {
     Name = "EC2-East"
   }
+
+resource "aws_instance" "east_instance_2" {
+  ami           = "ami-04a81a99f5ec58529"
+  instance_type = "t2.micro"
+  provider      = aws.east
+
+  tags = {
+    Name = "EC2-East-2"
+  }
 }
+
 
 # Create EC2 instance in us-west-2
 resource "aws_instance" "west_instance" {
@@ -91,4 +101,7 @@ output "east_instance_id" {
 
 output "west_instance_id" {
   value = aws_instance.west_instance.id
+
+output "east_instance_2_id" {
+  value = aws_instance.east_instance_2.id
 }
