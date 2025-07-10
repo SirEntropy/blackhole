@@ -130,13 +130,13 @@ resource "aws_security_group" "app" {
   description = "Security group for application server"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
-    description = "SSH access"
-  }
+# TODO: Replace the following example CIDR ranges with organization-approved trusted networks.
+#       Coordinate with the network/security team to finalize this list.
+cidr_blocks = [
+  "10.0.0.0/8",
+  "172.16.0.0/12",
+  "192.168.0.0/16"
+]
 
   ingress {
     from_port   = 80
