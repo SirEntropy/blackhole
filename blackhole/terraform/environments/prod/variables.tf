@@ -41,7 +41,8 @@ variable "cache_node_type" {
 variable "db_username" {
   description = "Database master username"
   type        = string
-  default     = "dbadmin"
+  # default     = "dbadmin"  # Removed hard-coded default for security
+  sensitive   = true
 }
 
 variable "db_password" {
