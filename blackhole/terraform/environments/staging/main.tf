@@ -32,6 +32,29 @@ resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
   }
 }
 
+# Enable server-side encryption for the S3 bucket
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_encryption" {
+  bucket   = aws_s3_bucket.terraform_state.id
+  provider = aws.east
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# Block public access to the S3 bucket
+resource "aws_s3_bucket_public_access_block" "terraform_state_pab" {
+  bucket   = aws_s3_bucket.terraform_state.id
+  provider = aws.east
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 # Create a random ID for the S3 bucket name
 resource "random_id" "bucket_suffix" {
   byte_length = 8
