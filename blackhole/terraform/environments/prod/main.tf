@@ -32,11 +32,11 @@ resource "aws_db_instance" "database" {
   vpc_security_group_ids = [aws_security_group.database.id]
 
   backup_retention_period = 7
-  backup_window          = "03:00-04:00"
-  maintenance_window     = "Mon:04:00-Mon:05:00"
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "Mon:04:00-Mon:05:00"
 
   storage_encrypted = true
-  
+
   deletion_protection = true
   skip_final_snapshot = false
 
@@ -48,18 +48,18 @@ resource "aws_db_instance" "database" {
 # ElastiCache Cluster
 resource "aws_elasticache_cluster" "redis" {
   cluster_id           = "${var.environment}-redis"
-  engine              = "redis"
-  node_type           = var.cache_node_type
-  num_cache_nodes     = 1
+  engine               = "redis"
+  node_type            = var.cache_node_type
+  num_cache_nodes      = 1
   parameter_group_name = "default.redis7"
-  port                = 6379
-  
-  subnet_group_name    = aws_elasticache_subnet_group.default.name
-  security_group_ids   = [aws_security_group.cache.id]
+  port                 = 6379
+
+  subnet_group_name  = aws_elasticache_subnet_group.default.name
+  security_group_ids = [aws_security_group.cache.id]
 
   snapshot_retention_limit = 7
-  snapshot_window         = "05:00-06:00"
-  maintenance_window      = "sun:06:00-sun:07:00"
+  snapshot_window          = "05:00-06:00"
+  maintenance_window       = "sun:06:00-sun:07:00"
 
   tags = {
     Name = "${var.environment}-redis"
@@ -134,7 +134,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
+    cidr_blocks = ["0.0.0.0/0"] # You might want to restrict this to your IP
     description = "SSH access"
   }
 
@@ -211,6 +211,25 @@ data "aws_ami" "amazon_linux_2" {
   filter {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+
+resource "aws_instance" "extra_ec2" {
+  ami           = data.aws_ami.amazon_linux_2.id
+  instance_type = var.instance_type
+  subnet_id     = var.subnet_ids[0]
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    encrypted   = true
+  }
+
+  monitoring = true
+
+  tags = {
+    Name = "${var.environment}-extra-ec2"
   }
 }
 
