@@ -32,11 +32,11 @@ resource "aws_db_instance" "database" {
   vpc_security_group_ids = [aws_security_group.database.id]
 
   backup_retention_period = 7
-  backup_window          = "03:00-04:00"
-  maintenance_window     = "Mon:04:00-Mon:05:00"
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "Mon:04:00-Mon:05:00"
 
   storage_encrypted = true
-  
+
   deletion_protection = true
   skip_final_snapshot = false
 
@@ -48,18 +48,18 @@ resource "aws_db_instance" "database" {
 # ElastiCache Cluster
 resource "aws_elasticache_cluster" "redis" {
   cluster_id           = "${var.environment}-redis"
-  engine              = "redis"
-  node_type           = var.cache_node_type
-  num_cache_nodes     = 1
+  engine               = "redis"
+  node_type            = var.cache_node_type
+  num_cache_nodes      = 1
   parameter_group_name = "default.redis7"
-  port                = 6379
-  
-  subnet_group_name    = aws_elasticache_subnet_group.default.name
-  security_group_ids   = [aws_security_group.cache.id]
+  port                 = 6379
+
+  subnet_group_name  = aws_elasticache_subnet_group.default.name
+  security_group_ids = [aws_security_group.cache.id]
 
   snapshot_retention_limit = 7
-  snapshot_window         = "05:00-06:00"
-  maintenance_window      = "sun:06:00-sun:07:00"
+  snapshot_window          = "05:00-06:00"
+  maintenance_window       = "sun:06:00-sun:07:00"
 
   tags = {
     Name = "${var.environment}-redis"
@@ -134,7 +134,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # You might want to restrict this to your IP
+    cidr_blocks = ["0.0.0.0/0"] # You might want to restrict this to your IP
     description = "SSH access"
   }
 
@@ -213,5 +213,64 @@ data "aws_ami" "amazon_linux_2" {
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 }
+
+
+resource "aws_security_group" "std_ec2_app2" {
+  name_prefix = "${var.environment}-std-ec2-app2-"
+  description = "Security group for std_ec2_app2 EC2 instance"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "SSH access"
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP access"
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS access"
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+  tags = {
+    Name = "${var.environment}-std-ec2-app2"
+  }
+}
+
+resource "aws_instance" "std_ec2_app2" {
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_ids[0]
+  vpc_security_group_ids = [aws_security_group.std_ec2_app2.id]
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    encrypted   = true
+  }
+
+  monitoring = true
+
+  tags = {
+    Name = "${var.environment}-std-ec2-app2"
+  }
+}
+
 
 data "aws_caller_identity" "current" {}
